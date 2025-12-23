@@ -15,7 +15,7 @@ A web application for visualizing and comparing historical stock prices. Built w
 - React 18
 - Recharts for data visualization
 - Vite for build tooling
-- Alpha Vantage API for stock data
+- Finnhub API for real-time stock data
 
 ## Getting Started
 
@@ -54,10 +54,10 @@ The built files will be in the `dist` directory.
 
 ## API Configuration
 
-This project uses the Alpha Vantage API for stock data. The demo API key is included but has rate limits. For production use, get your own free API key from [Alpha Vantage](https://www.alphavantage.co/support/#api-key) and update it in `src/utils/api.js`:
+This project uses the Finnhub API for real-time stock data. A demo API key is included for testing. For production use or higher rate limits, get your own free API key from [Finnhub](https://finnhub.io/register) and update it in `src/utils/api.js`:
 
 ```javascript
-const API_KEY = 'your-api-key-here';
+const FINNHUB_API_KEY = 'your-api-key-here';
 ```
 
 ## Usage
@@ -70,7 +70,7 @@ const API_KEY = 'your-api-key-here';
 
 ## Limitations
 
-- Demo API key has a rate limit of 5 requests per minute
+- Free API tier has rate limits (60 calls per minute)
 - Maximum 5 stocks can be compared at once
 - Data shows the last 100 trading days
 

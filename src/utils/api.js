@@ -1,75 +1,34 @@
-const API_KEY = 'demo';
-const BASE_URL = 'https://www.alphavantage.co/query';
+const FINNHUB_API_KEY = 'ctbnq49r01qie21tadi0ctbnq49r01qie21tadig';
+const FINNHUB_BASE = 'https://finnhub.io/api/v1';
 
-export const fetchStockData = async (symbol, interval = 'daily') => {
-  const functionType = interval === 'daily' ? 'TIME_SERIES_DAILY' : 'TIME_SERIES_INTRADAY';
-  const params = new URLSearchParams({
-    function: functionType,
-    symbol: symbol.toUpperCase(),
-    apikey: API_KEY,
-    outputsize: 'compact'
-  });
+export const fetchStockData = async (symbol) => {
+  const upperSymbol = symbol.toUpperCase();
 
-  if (interval === 'intraday') {
-    params.append('interval', '60min');
-  }
+  const to = Math.floor(Date.now() / 1000);
+  const from = to - (100 * 24 * 60 * 60);
 
   try {
-    const response = await fetch(`${BASE_URL}?${params}`);
+    const response = await fetch(
+      `${FINNHUB_BASE}/stock/candle?symbol=${upperSymbol}&resolution=D&from=${from}&to=${to}&token=${FINNHUB_API_KEY}`
+    );
+
     const data = await response.json();
 
-    if (data['Error Message']) {
-      throw new Error('Invalid stock symbol');
+    if (data.s === 'no_data' || !data.c) {
+      throw new Error('Invalid stock symbol or no data available');
     }
 
-    if (data['Note']) {
-      throw new Error('API call limit reached. Please wait a moment.');
-    }
-
-    const timeSeriesKey = interval === 'daily' ? 'Time Series (Daily)' : 'Time Series (60min)';
-    const timeSeries = data[timeSeriesKey];
-
-    if (!timeSeries) {
-      throw new Error('No data available');
-    }
-
-    const formattedData = Object.entries(timeSeries).map(([date, values]) => ({
-      date,
-      open: parseFloat(values['1. open']),
-      high: parseFloat(values['2. high']),
-      low: parseFloat(values['3. low']),
-      close: parseFloat(values['4. close']),
-      volume: parseInt(values['5. volume'])
-    })).reverse();
+    const formattedData = data.t.map((timestamp, idx) => ({
+      date: new Date(timestamp * 1000).toISOString().split('T')[0],
+      open: parseFloat(data.o[idx].toFixed(2)),
+      high: parseFloat(data.h[idx].toFixed(2)),
+      low: parseFloat(data.l[idx].toFixed(2)),
+      close: parseFloat(data.c[idx].toFixed(2)),
+      volume: data.v[idx]
+    }));
 
     return formattedData;
   } catch (error) {
-    throw error;
-  }
-};
-
-export const searchSymbol = async (keywords) => {
-  const params = new URLSearchParams({
-    function: 'SYMBOL_SEARCH',
-    keywords: keywords,
-    apikey: API_KEY
-  });
-
-  try {
-    const response = await fetch(`${BASE_URL}?${params}`);
-    const data = await response.json();
-
-    if (data['bestMatches']) {
-      return data['bestMatches'].map(match => ({
-        symbol: match['1. symbol'],
-        name: match['2. name'],
-        region: match['4. region']
-      }));
-    }
-
-    return [];
-  } catch (error) {
-    console.error('Search failed:', error);
-    return [];
+    throw new Error(error.message || 'Failed to fetch stock data');
   }
 };
