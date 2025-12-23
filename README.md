@@ -15,7 +15,7 @@ A web application for visualizing and comparing historical stock prices. Built w
 - React 18
 - Recharts for data visualization
 - Vite for build tooling
-- Finnhub API for real-time stock data
+- Twelve Data API for real-time stock data
 
 ## Getting Started
 
@@ -37,7 +37,16 @@ cd stock-price-visualizer
 npm install
 ```
 
-3. Start the development server
+3. Get a free API key (optional but recommended)
+   - Visit [Twelve Data](https://twelvedata.com/pricing) and sign up for a free account
+   - Copy your API key
+   - Create a `.env` file in the project root:
+   ```bash
+   VITE_TWELVE_DATA_API_KEY=your_api_key_here
+   ```
+   - The demo key works but has strict rate limits
+
+4. Start the development server
 ```bash
 npm run dev
 ```
@@ -54,11 +63,14 @@ The built files will be in the `dist` directory.
 
 ## API Configuration
 
-This project uses the Finnhub API for real-time stock data. A demo API key is included for testing. For production use or higher rate limits, get your own free API key from [Finnhub](https://finnhub.io/register) and update it in `src/utils/api.js`:
+This project uses the Twelve Data API for real-time stock data. A demo API key is included for basic testing, but getting your own free API key is recommended:
 
-```javascript
-const FINNHUB_API_KEY = 'your-api-key-here';
-```
+1. Sign up at [Twelve Data](https://twelvedata.com/pricing) (free tier available)
+2. Get your API key from the dashboard
+3. Create a `.env` file in the project root
+4. Add: `VITE_TWELVE_DATA_API_KEY=your_api_key_here`
+
+The free tier includes 800 API calls per day, which is plenty for testing and demo purposes.
 
 ## Usage
 
@@ -70,7 +82,8 @@ const FINNHUB_API_KEY = 'your-api-key-here';
 
 ## Limitations
 
-- Free API tier has rate limits (60 calls per minute)
+- Demo API key has very limited requests (get your own free key for better experience)
+- Free API tier: 800 calls/day, 8 calls/minute
 - Maximum 5 stocks can be compared at once
 - Data shows the last 100 trading days
 

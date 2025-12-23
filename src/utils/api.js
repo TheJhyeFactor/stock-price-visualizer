@@ -1,31 +1,27 @@
-const FINNHUB_API_KEY = 'ctbnq49r01qie21tadi0ctbnq49r01qie21tadig';
-const FINNHUB_BASE = 'https://finnhub.io/api/v1';
+const TWELVE_DATA_API_KEY = import.meta.env.VITE_TWELVE_DATA_API_KEY || 'demo';
 
 export const fetchStockData = async (symbol) => {
   const upperSymbol = symbol.toUpperCase();
 
-  const to = Math.floor(Date.now() / 1000);
-  const from = to - (100 * 24 * 60 * 60);
-
   try {
     const response = await fetch(
-      `${FINNHUB_BASE}/stock/candle?symbol=${upperSymbol}&resolution=D&from=${from}&to=${to}&token=${FINNHUB_API_KEY}`
+      `https://api.twelvedata.com/time_series?symbol=${upperSymbol}&interval=1day&outputsize=100&apikey=${TWELVE_DATA_API_KEY}`
     );
 
     const data = await response.json();
 
-    if (data.s === 'no_data' || !data.c) {
-      throw new Error('Invalid stock symbol or no data available');
+    if (data.status === 'error' || !data.values) {
+      throw new Error(data.message || 'Invalid stock symbol or no data available');
     }
 
-    const formattedData = data.t.map((timestamp, idx) => ({
-      date: new Date(timestamp * 1000).toISOString().split('T')[0],
-      open: parseFloat(data.o[idx].toFixed(2)),
-      high: parseFloat(data.h[idx].toFixed(2)),
-      low: parseFloat(data.l[idx].toFixed(2)),
-      close: parseFloat(data.c[idx].toFixed(2)),
-      volume: data.v[idx]
-    }));
+    const formattedData = data.values.map((item) => ({
+      date: item.datetime,
+      open: parseFloat(parseFloat(item.open).toFixed(2)),
+      high: parseFloat(parseFloat(item.high).toFixed(2)),
+      low: parseFloat(parseFloat(item.low).toFixed(2)),
+      close: parseFloat(parseFloat(item.close).toFixed(2)),
+      volume: parseInt(item.volume)
+    })).reverse();
 
     return formattedData;
   } catch (error) {
